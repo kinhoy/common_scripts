@@ -31,8 +31,8 @@ def pyMuPDF_fitz(pdfPath, imagePath):
 
 if __name__ == "__main__":
     # 批量导出pdf为图片格式
-    pdf_path = 'C:/Users/h9h/Desktop/aa/'
-    to_img_output_path = 'C:/Users/h9h/Desktop/aa_out/'
+    pdf_path = 'C:/Users/user/Desktop/aa/'
+    to_img_output_path = 'C:/Users/user/Desktop/aa_out/'
     if not os.path.exists(to_img_output_path):
         os.makedirs(to_img_output_path)
     files = os.listdir(pdf_path)

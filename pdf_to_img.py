@@ -24,6 +24,7 @@ def pyMuPDF_fitz(pdfPath, imagePath):
         if not os.path.exists(imagePath): 
             os.makedirs(imagePath)
 
+        # pppp = pg + 4
         pix.writePNG(imagePath + '/' + 'img_%s.png' % pg)  # 将图片写入指定的文件夹内
     endTime_pdf2img = datetime.datetime.now()  # 结束时间
     print('pdf2img时间=', (endTime_pdf2img - startTime_pdf2img).seconds)

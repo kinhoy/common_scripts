@@ -4,7 +4,7 @@ from PIL import Image
 import cv2
 import numpy as np
 
-file_path="C:/Users/h9h/Desktop/underground/"
+file_path="C:/Users/user/Desktop/underground/"
 path = file_path + str(0)+".png"
 img_out=cv2.imread(path)
 

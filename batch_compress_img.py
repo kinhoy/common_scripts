@@ -1,8 +1,8 @@
 import os
 from PIL import Image
 # 列出目录下所有的图片，存在 images 这个列表中
-img_path = 'C:/Users/h9h/Desktop/a_img/'
-img_output_path = 'C:/Users/h9h/Desktop/a_out_img/'
+img_path = 'C:/Users/user/Desktop/a_img/'
+img_output_path = 'C:/Users/user/Desktop/a_out_img/'
 images = os.listdir(img_path)
 #文件名按数字排序
 images.sort(key = lambda x: int(x[4:-4])) 
