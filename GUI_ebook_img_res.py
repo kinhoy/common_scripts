@@ -3,7 +3,6 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
 from PIL import Image
-import subprocess
 
 def resize_image(input_image, output_image, scale):
     # 按指定的倍数缩小图片 scale: 缩小倍数，如0.5表示缩小一半
@@ -12,6 +11,7 @@ def resize_image(input_image, output_image, scale):
     new_width = int(width * scale)
     new_height = int(height * scale)
     resized_image = image.resize((new_width, new_height), Image.LANCZOS)
+    resized_image = resized_image.convert('RGB')
     resized_image.save(output_image)
     print(f"缩图 {output_image} 创建成功！")
 
@@ -23,8 +23,12 @@ def create_thumbnail(image_path, thumbnail_path, size):
         # 保存缩略图
         image.save(thumbnail_path)
         print(f"缩略图 {thumbnail_path} 创建成功！")
-    except IOError:
+    except Exception as e:
+        print(f"出现了一个错误: {str(e)}")
         print(f"无法创建缩略图 {thumbnail_path}！")
+        image = image.convert('RGB')
+        image.save(thumbnail_path)
+        print(f"cannot write mode RGBA as JPEG 再次尝试转缩略图 {thumbnail_path} 创建成功！")
 
 def batch_resize_images(input_folder, output_folder, scale):
     if not os.path.exists(output_folder):
@@ -45,16 +49,34 @@ def batch_create_thumbnails(input_dir, output_dir, size):
             output_path = os.path.join(output_dir, filename)
             # 创建缩略图
             create_thumbnail(input_path, output_path, size)
-def open_folder(folder_path):
-    try:
-        if os.name == 'nt':  # If it's a Windows system
-            subprocess.Popen(['explorer', folder_path])
-        elif os.name == 'posix':  # If it's a Unix-like system (e.g., Linux and macOS)
-            subprocess.Popen(['xdg-open', folder_path])
-        else:
-            messagebox.showwarning("Warning", "Unsupported operating system")
-    except Exception as e:
-        messagebox.showerror("Error", f"Unable to open folder: {str(e)}")
+
+def get_resize_images_max_size(input_path):
+    total_width = 0
+    total_height = 0
+    max_width = 0
+    max_height = 0
+    count = 0
+    # 遍历文件夹中的所有图片文件
+    for filename in os.listdir(input_path):
+        if filename.endswith(".jpg") or filename.endswith(".png"):  # 根据需要修改文件类型
+            image_path = os.path.join(input_path, filename)
+            image = Image.open(image_path)
+            width, height = image.size
+            print("分辨率：{}x{}".format(width, height))
+            total_width += width
+            total_height += height
+            count += 1
+            # 更新最大分辨率
+            max_width = max(max_width, width)
+            max_height = max(max_height, height)
+    if count > 0:
+        average_width = total_width // count
+        average_height = total_height // count
+        print("平均分辨率：{}x{}".format(average_width, average_height))
+        print("最大分辨率：{}x{}".format(max_width, max_height))
+        messagebox.showinfo("分辨率数据如下", f"平均分辨率：{str(average_width)}x{str(average_height)} 最大分辨率：{str(max_width)}x{str(max_height)}")
+    else:
+        print("没有找到任何图片文件")
 
 def resize_images_and_create_thumbnails():
     scale_factor = float(scale_entry.get())
@@ -65,14 +87,16 @@ def resize_images_and_create_thumbnails():
     height = int(thumbnail_height_entry.get())  # 获取高度值
     thum_size = (width, height)
     try:
-        batch_resize_images(input_folder, output_resize_images, scale_factor)
-        batch_create_thumbnails(input_folder, output_thumbnails, thum_size)
-        messagebox.showinfo("成功", "原图缩放和生成缩略图成功!")
+        if input_folder and output_thumbnails and output_resize_images: 
+            batch_resize_images(input_folder, output_resize_images, scale_factor)
+            batch_create_thumbnails(input_folder, output_thumbnails, thum_size)
+            messagebox.showinfo("成功", "原图缩放和生成缩略图成功!")
+            get_resize_images_max_size(output_resize_images)
+        else:
+            messagebox.showinfo("提示", "三个文件夹需要同时输入")
     except Exception as e:
         messagebox.showerror("Error", f"An error occurred: {str(e)}")
         print(str(e))
-    open_folder(output_resize_images)  # Open the first output folder
-    open_folder(output_thumbnails) 
 
 def browse_input_folder():
     input_folder = filedialog.askdirectory()
@@ -95,7 +119,7 @@ input_folder_label = tk.Label(app, text="原图路径:")
 input_folder_label.pack()
 
 input_folder_var = tk.StringVar()
-input_folder_entry = tk.Entry(app, textvariable=input_folder_var)
+input_folder_entry = tk.Entry(app, width=70, textvariable=input_folder_var)
 input_folder_entry.pack()
 
 browse_input_button = tk.Button(app, text="浏览", command=browse_input_folder)
@@ -113,7 +137,7 @@ output_resize_images_label = tk.Label(app, text="原图缩放图片保存路径:
 output_resize_images_label.pack()
 
 output_resize_images_var = tk.StringVar()
-output_resize_images_entry = tk.Entry(app, textvariable=output_resize_images_var)
+output_resize_images_entry = tk.Entry(app, width=70, textvariable=output_resize_images_var)
 output_resize_images_entry.pack()
 
 browse_output_resize_images_button = tk.Button(app, text="浏览", command=browse_output_resize_images_folder)
@@ -135,7 +159,7 @@ output_thumbnails_label = tk.Label(app, text="原图转缩略图保存路径:")
 output_thumbnails_label.pack()
 
 output_thumbnails_var = tk.StringVar()
-output_thumbnails_entry = tk.Entry(app, textvariable=output_thumbnails_var)
+output_thumbnails_entry = tk.Entry(app, width=70, textvariable=output_thumbnails_var)
 output_thumbnails_entry.pack()
 
 browse_output_thumbnails_button = tk.Button(app, text="浏览", command=browse_output_thumbnails_folder)
