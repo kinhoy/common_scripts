@@ -5,14 +5,14 @@ import cv2
 from PyQt5.QtCore import Qt  # 导入Qt模块
 from PyQt5.QtWidgets import QMessageBox, QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSlider, QPushButton, QFileDialog
 from PyQt5.QtGui import QPixmap, QImage, QPainter, QTransform, QPen
-
 class ImageRotateTool(QWidget):
     def __init__(self):
         super().__init__()
         self.initUI()
 
     def initUI(self):
-        self.mini_size = 5
+        # mini_size 窗口缩小比例
+        self.mini_size = 9
         self.originalImage = None
         self.currentImage = None
         self.cv_img = None
@@ -110,6 +110,9 @@ class ImageRotateTool(QWidget):
             self.cv_img = cv2.imread(filePath, cv2.IMREAD_GRAYSCALE)
 
             self.setFixedSize(int(1.2*self.originalImage.width()// self.mini_size), int(1.2*self.originalImage.height()// self.mini_size))
+
+            img_name = filePath.split('/')[-1]  # 获取文件名部分
+            self.setWindowTitle(f'正在操作图片 - {img_name}')
 
     def rotateImage(self):
         self.angle = self.angleSlider.value() + self.mini_angleSlider.value() / 100 
