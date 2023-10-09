@@ -3,6 +3,7 @@
 import cv2
 import numpy as np
 import os
+import shutil
 
 def text_img_rotation_adjust(img_path, save_path):
     print("working: {}".format(img_path))
@@ -40,7 +41,10 @@ def text_img_rotation_adjust(img_path, save_path):
         cv2.line(image, (x1, y1), (x2, y2), (0, 0, 255), 1)
     # 计算平均旋转角度
     if count == 0:
-        print("图片{}不太行").format(img_path)
+        print(40*'#')
+        print("图片{}不太行，直接复制原图，无法自动处理".format(img_path))
+        print(40*'#')
+        shutil.copy(img_path, save_path)
         return
     average = sum / count
     print("average: {}".format(average))
@@ -59,8 +63,8 @@ def text_img_rotation_adjust(img_path, save_path):
 
 if __name__=='__main__':
 
-    input_path = r"D:\Documents\xpwszl14"
-    output_path = r"D:\Documents\xpwszl14_temp_rot"
+    input_path = r"D:\Documents\center"
+    output_path = r"D:\Documents\center\rot"
 
     if not os.path.exists(output_path):
         os.makedirs(output_path)
