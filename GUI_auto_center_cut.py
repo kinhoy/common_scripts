@@ -117,7 +117,8 @@ def auto_cut(img_path, save_path, count_num):
     for i in range(origin_width):
         if not np.array_equal(new_down[tmp_high,i], [0, 0, 0]):
             cut_width_1 = max(i,cut_width_1)
-    print(f"左白右黑 切割宽度{cut_width_1}")
+    tmp_max_width = max(new_x1,new_x2,cut_width_1)
+    print(f"左白右黑 切割宽度{tmp_max_width}")
 
     cut_width_2 = origin_width
     for i in range(origin_width-1,0,-1):
@@ -127,11 +128,12 @@ def auto_cut(img_path, save_path, count_num):
     for i in range(origin_width-1,0,-1):
         if not np.array_equal(new_up[tmp_high,i], [0, 0, 0]):
             cut_width_2 = min(i,cut_width_2)
-    print(f"左黑右白 切割宽度{cut_width_2}")
+    tmp_min_width = min(new_x1,new_x2,cut_width_2)
+    print(f"左黑右白 切割宽度{tmp_min_width}")
 
     # 裁剪坐标为[y0:y1, x0:x1]
-    left_part = new_down[0:origin_high, 0:cut_width_1]
-    right_part = new_up[0:origin_high, cut_width_2:origin_width]
+    left_part = new_down[0:origin_high, 0:tmp_max_width]
+    right_part = new_up[0:origin_high, tmp_min_width:origin_width]
 
     output_left_path = os.path.join(save_path, output_left)
     output_right_path = os.path.join(save_path, output_right)
@@ -147,7 +149,9 @@ def crop_from_center():
     output_dir = output_cut_dir_entry.get()
     global count
     count = int(count_entry.get())
-    for filename in os.listdir(input_dir):
+    files= os.listdir(input_dir)
+    files.sort(key = lambda x: int(x[0:-4]))
+    for filename in files:
         if filename.endswith(".jpg") or filename.endswith(".png"):
             print(filename)
             input_path = os.path.join(input_dir, filename)
