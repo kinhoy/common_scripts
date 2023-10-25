@@ -53,15 +53,22 @@ def real_auto_center_cut(img_path, save_path, count_num):
     # 创建新的白色背景图像
     new_left_image = np.ones((height, center, 3), dtype=np.uint8) * 255
     new_right_image = new_left_image.copy()
-    # 计算粘贴位置的偏移量
-    x_offset = (center - width) // 2
-    y_offset = (height - left_part.shape[0]) // 2
-    new_left_image[y_offset:y_offset + left_part.shape[0], x_offset:x_offset + width] = left_part
-
-    width = right_part.shape[1]
-    x_offset = (center - width) // 2
-    y_offset = (height - right_part.shape[0]) // 2
-    new_right_image[y_offset:y_offset + right_part.shape[0], x_offset:x_offset + width] = right_part
+    
+    if left_part.shape[1] >= new_left_image.shape[1]:
+        new_left_image = left_part
+    else:
+        x_offset = (center - width) // 2
+        y_offset = (height - left_part.shape[0]) // 2
+        print(f"x_offset:{x_offset} , y_offset:{y_offset}")
+        new_left_image[y_offset:y_offset + left_part.shape[0], x_offset:x_offset + width] = left_part
+    if right_part.shape[1] >= new_right_image.shape[1]:
+        new_right_image = right_part
+    else:
+        width = right_part.shape[1]
+        x_offset = (center - width) // 2
+        y_offset = (height - right_part.shape[0]) // 2
+        print(f"x_offset:{x_offset} , y_offset:{y_offset}")
+        new_right_image[y_offset:y_offset + right_part.shape[0], x_offset:x_offset + width] = right_part
 
     global count
     output_left = f"{count_num}.jpg"

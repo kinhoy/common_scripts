@@ -5,7 +5,7 @@ import numpy as np
 
 text_detector = hub.Module(name="chinese_text_detection_db_server", enable_mkldnn=True)       # mkldnn加速仅在CPU下有效
 
-img = cv2.imread('./cut/20.jpg')
+img = cv2.imread('26.jpg')
 copy = img.copy()
 result = text_detector.detect_text(images=[img],output_dir='.',visualization=True)
 # ,use_gpu=True)
@@ -83,16 +83,24 @@ width = left_part.shape[1]
 # 创建新的白色背景图像
 new_left_image = np.ones((height, center, 3), dtype=np.uint8) * 255
 new_right_image = new_left_image.copy()
-# 计算粘贴位置的偏移量
-x_offset = (center - width) // 2
-y_offset = (height - left_part.shape[0]) // 2
-new_left_image[y_offset:y_offset + left_part.shape[0], x_offset:x_offset + width] = left_part
 
-# width = right_part.shape[1]
-# x_offset = (center - width) // 2
-# y_offset = (height - right_part.shape[0]) // 2
-# new_right_image[y_offset:y_offset + right_part.shape[0], x_offset:x_offset + width] = right_part
+print(f"new_left_image:{new_left_image.shape} , new_right_image:{new_right_image.shape}")
 
+if left_part.shape[1] >= new_left_image.shape[1]:
+    new_left_image = left_part
+else:
+    x_offset = (center - width) // 2
+    y_offset = (height - left_part.shape[0]) // 2
+    print(f"x_offset:{x_offset} , y_offset:{y_offset}")
+    new_left_image[y_offset:y_offset + left_part.shape[0], x_offset:x_offset + width] = left_part
+if right_part.shape[1] >= new_right_image.shape[1]:
+    new_right_image = right_part
+else:
+    width = right_part.shape[1]
+    x_offset = (center - width) // 2
+    y_offset = (height - right_part.shape[0]) // 2
+    print(f"x_offset:{x_offset} , y_offset:{y_offset}")
+    new_right_image[y_offset:y_offset + right_part.shape[0], x_offset:x_offset + width] = right_part
 
 plt.subplot(141), plt.imshow(img), plt.title('Original')
 plt.xticks([]), plt.yticks([])
@@ -100,10 +108,10 @@ plt.xticks([]), plt.yticks([])
 plt.subplot(142), plt.imshow(copy), plt.title('after')
 plt.xticks([]), plt.yticks([])
 
-plt.subplot(143), plt.imshow(new_left_image), plt.title('left_part')
+plt.subplot(143), plt.imshow(new_left_image), plt.title('new_left_image')
 plt.xticks([]), plt.yticks([])
 
-plt.subplot(144), plt.imshow(right_part), plt.title('right_part')
+plt.subplot(144), plt.imshow(new_right_image), plt.title('new_right_image')
 plt.xticks([]), plt.yticks([])
 
 
