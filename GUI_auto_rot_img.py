@@ -1,12 +1,16 @@
-# 参考 https://blog.csdn.net/wzw12315/article/details/105676529
-# 基于直线探测的文本类图片矫正算法
 import cv2
 import numpy as np
+import datetime
 import os
+import tkinter as tk
+from tkinter import filedialog
+from tkinter import messagebox
 import shutil
 
-def text_img_rotation_adjust(img_path, save_path):
-    print("working: {}".format(img_path))
+wrong_file_list = []
+
+def auto_rot_img(img_path, save_path):
+    print(f"working: {img_path} to: {save_path}")
     image = cv2.imread(img_path, cv2.IMREAD_COLOR)
     copy = image.copy()
 
@@ -20,10 +24,12 @@ def text_img_rotation_adjust(img_path, save_path):
     # canny = cv2.Canny(image,300,700,3)
     lines = cv2.HoughLines(canny,1,np.pi/180,220)
     if lines is None or len(lines) == 0:
-        print(40*'#')
+        print(80*'#')
         print("图片{}不太行，直接复制原图，无法自动处理".format(img_path))
-        print(40*'#')
+        print(80*'#')
         shutil.copy(img_path, save_path)
+        global wrong_file_list
+        wrong_file_list.append(save_path)
         return
     sum = 0.0
     count = 0
@@ -61,19 +67,46 @@ def text_img_rotation_adjust(img_path, save_path):
     # cv2.CV_IMWRITE_WEBP_QUALITY  设置图片的格式为.webp格式的图片质量，值为0--100
     # cv2.CV_IMWRITE_PNG_COMPRESSION  设置.png格式的压缩比，其值为0--9（数值越大，压缩比越大），默认为3
 
-if __name__=='__main__':
 
-    input_path = r"D:\Documents\center"
-    output_path = r"D:\Documents\rot"
+def batch_rot_img():
+    input_dir = input_dir_entry.get()
+    output_dir = output_cut_dir_entry.get()
+    files= os.listdir(input_dir)
+    files.sort(key = lambda x: int(x[0:-4]))
+    for filename in files:
+        if filename.endswith(".jpg") or filename.endswith(".png"):
+            print(filename)
+            input_path = os.path.join(input_dir, filename)
+            output_path = os.path.join(output_dir, filename)
+            # 执行切割操作
+            auto_rot_img(input_path, output_path)
+    print(80*"#")
+    print("自动方向矫正完成!")
+    print(80*"#")
+    print("本次异常处理图片文件：")
+    global wrong_file_list
+    for i in wrong_file_list:
+        print(i)
+    messagebox.showinfo("成功", "批量文本图片自动方向矫正完成!")
 
-    if not os.path.exists(output_path):
-        os.makedirs(output_path)
+app = tk.Tk()
+app.title("自动文本图片方向矫正")
 
-    for filename in os.listdir(input_path):
-        print(20*'*')
-        if filename.endswith(('.jpg', '.jpeg', '.png')):
-            input_img_path = os.path.join(input_path, filename)
-            output_img_path = os.path.join(output_path, filename)
-            text_img_rotation_adjust(input_img_path, output_img_path)
+tk.Label(app, text="原图路径:").pack()
+input_dir_entry = tk.Entry(app, width=70)
+input_dir_entry.pack()
+tk.Button(app, text="浏览", command=lambda: browse_directory(input_dir_entry)).pack()
 
-    # 竖向排版暂不考虑
+tk.Label(app, text="裁剪保存路径:").pack()
+output_cut_dir_entry = tk.Entry(app, width=70)
+output_cut_dir_entry.pack()
+tk.Button(app, text="浏览", command=lambda: browse_directory(output_cut_dir_entry)).pack()
+
+
+tk.Button(app, text="自动矫正", command=batch_rot_img).pack()
+def browse_directory(entry_field):
+    directory = filedialog.askdirectory()
+    entry_field.delete(0, tk.END)
+    entry_field.insert(0, directory)
+
+app.mainloop()

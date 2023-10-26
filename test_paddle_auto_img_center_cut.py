@@ -5,7 +5,7 @@ import numpy as np
 
 text_detector = hub.Module(name="chinese_text_detection_db_server", enable_mkldnn=True)       # mkldnn加速仅在CPU下有效
 
-img = cv2.imread('26.jpg')
+img = cv2.imread('76.jpg')
 copy = img.copy()
 result = text_detector.detect_text(images=[img],output_dir='.',visualization=True)
 # ,use_gpu=True)
@@ -72,7 +72,7 @@ print(f"左侧 {min_left} {center_left}, 右侧 {center_right}  {max_right}")
 # img.shape[1]：图像的水平尺寸（宽度）
 # cut_part = copy[0:copy.shape[0],min_left:max_right]
 
-offset = 80
+offset  = 80 if (min_left-80) > 0 else 0
 # 裁剪
 left_part = copy[0:copy.shape[0], min_left-offset:center_left+offset]
 right_part = copy[0:copy.shape[0], center_right-offset:max_right+offset]
@@ -102,16 +102,22 @@ else:
     print(f"x_offset:{x_offset} , y_offset:{y_offset}")
     new_right_image[y_offset:y_offset + right_part.shape[0], x_offset:x_offset + width] = right_part
 
-plt.subplot(141), plt.imshow(img), plt.title('Original')
+plt.subplot(161), plt.imshow(img), plt.title('Original')
 plt.xticks([]), plt.yticks([])
 
-plt.subplot(142), plt.imshow(copy), plt.title('after')
+plt.subplot(162), plt.imshow(copy), plt.title('after')
 plt.xticks([]), plt.yticks([])
 
-plt.subplot(143), plt.imshow(new_left_image), plt.title('new_left_image')
+plt.subplot(163), plt.imshow(left_part), plt.title('left_part')
 plt.xticks([]), plt.yticks([])
 
-plt.subplot(144), plt.imshow(new_right_image), plt.title('new_right_image')
+plt.subplot(164), plt.imshow(right_part), plt.title('right_part')
+plt.xticks([]), plt.yticks([])
+
+plt.subplot(165), plt.imshow(new_left_image), plt.title('new_left_image')
+plt.xticks([]), plt.yticks([])
+
+plt.subplot(166), plt.imshow(new_right_image), plt.title('new_right_image')
 plt.xticks([]), plt.yticks([])
 
 

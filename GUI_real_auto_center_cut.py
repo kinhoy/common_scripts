@@ -25,10 +25,10 @@ def real_auto_center_cut(img_path, save_path, count_num):
 
     for re in data:
         # 0左下、1右下、2右上、3左上
-        box = [re[1],re[0],re[3],re[2]]
-        box = np.intp(box)
+        # box = [re[1],re[0],re[3],re[2]]
+        # box = np.intp(box)
         # boxPoints返回四个点顺序：右下→左下→左上→右上
-        cv2.drawContours(copy, [box], 0, (0,0, 255), 3)
+        # cv2.drawContours(copy, [box], 0, (0,0, 255), 3)
         tmp1 = (re[3][0]+re[2][0])//2
         tmp2 = (re[0][0]+re[1][0])//2
         if tmp1 < center or tmp2 < center:
@@ -43,7 +43,7 @@ def real_auto_center_cut(img_path, save_path, count_num):
     print(f"左侧 {min_left} {center_left}, 右侧 {center_right}  {max_right}")
 
     # 两侧留白宽度
-    offset = 80
+    offset  = 80 if (min_left-80) > 0 else 0
     # 裁剪
     left_part = img[0:img.shape[0], min_left-offset:center_left+offset]
     right_part = img[0:img.shape[0], center_right-offset:max_right+offset]
